@@ -13,6 +13,7 @@ namespace DesktopProj222
 {
     public partial class Registration : Form
     {
+        public int empid;
         public Registration()
         {
             InitializeComponent();
@@ -35,9 +36,11 @@ namespace DesktopProj222
             string cnt = txtContact.Text;
             string email = txtEmail.Text;
             string add = txtAddress.Text;
+            SqlConnection con=null;
+            try
+            {
 
-
-            SqlConnection con = new SqlConnection(str);
+            con = new SqlConnection(str);
 
             SqlCommand cmd = new SqlCommand();
             cmd.Connection = con;
@@ -57,11 +60,21 @@ namespace DesktopProj222
                 MessageBox.Show("Record not inserted!!!");
 
             }
-            con.Close();
+           
 
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+            finally
+            {
+                con.Close();
+            }
             btnSave.Enabled = false;
 
-
+            Registration_Load(sender,e);
         }
 
         private void btnSearch_Click(object sender, EventArgs e)
@@ -97,6 +110,72 @@ namespace DesktopProj222
                 MessageBox.Show("Record not found!!!");
             }
             
+        }
+
+        private void Registration_Load(object sender, EventArgs e)
+        {
+            string str = Program.Constr;
+            SqlConnection con = new SqlConnection(str);
+
+            SqlDataAdapter adp = new SqlDataAdapter("select * from tblEmployee",con);
+            DataTable dt = new DataTable();
+            adp.Fill(dt);
+            dataGridView1.DataSource= dt;
+           // dataGridView1.Columns[0].Visible = false;
+            
+        }
+
+        private void dataGridView1_CellContentClick(object sender, DataGridViewCellEventArgs e)
+        {
+            try
+            {         
+         
+
+                var selectData =(DataRowView) dataGridView1.SelectedRows[0].DataBoundItem;
+                empid = int.Parse(selectData["id"].ToString());
+                txtName.Text = selectData["name"].ToString();
+                txtAddress.Text = selectData["Address"].ToString();
+                txtContact.Text = selectData["contact"].ToString();
+                txtEmail.Text= selectData["email"].ToString();
+            
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("exception occured"+ex.Message);
+            }
+        }
+
+        private void btnUpdate_Click(object sender, EventArgs e)
+        {
+            string str = Program.Constr;
+            SqlConnection con = new SqlConnection(str);
+
+            SqlDataAdapter adp = new SqlDataAdapter("select * from tblEmployee", con);
+            DataTable dt = new DataTable();
+            SqlCommandBuilder cmdb=new SqlCommandBuilder(adp);
+            adp.Fill(dt);
+            
+            foreach (DataRow dr in dt.Rows)
+            {
+                if (int.Parse(dr[0].ToString())==empid)
+                {
+                    dr["name"] = txtName.Text;
+                    dr["contact"] = txtContact.Text;
+                    dr["email"] = txtEmail.Text;
+                    dr["Address"] = txtAddress.Text;
+                    int n = adp.Update(dt);
+                    if (n > 0)
+                    {
+                        MessageBox.Show("record updated successfully...");
+                    }
+                    else
+                    {
+                        MessageBox.Show("not updated !!!!");
+                    }
+                   
+                }    
+            }
+            Registration_Load(sender, e);
         }
     }
 }

@@ -15,7 +15,8 @@ namespace DesktopProj222
         {
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Registration());
+            // Application.Run(new Registration());
+            Application.Run(new frmRegistration());
         }
     }
 }
